@@ -2,41 +2,35 @@
 
 An intelligent honey-product traceability and assurance system that follows product records across the supply chain, checks traceability compliance, analyzes supply-chain information, and coordinates multiple agents through a workflow orchestrator.
 
-The system is designed to demonstrate **Traceability, Compliance, and Supply-Chain Analysis agents**, persistent product-state management, RAG-based traceability rules, workflow chaining, failure handling and recovery, telemetry, authorization, and secure deployment.
+The project demonstrates **Traceability, Compliance, and Supply-Chain Analysis agents**, persistent product state, rule-based RAG retrieval, workflow chaining, failure handling and recovery, telemetry, authorization, and secure deployment.
+
+## 🚀 Live Demo
+
+**API Documentation (Swagger):**  
+https://blockchain-honey-traceability.onrender.com/docs
+
+**Backend API:**  
+https://blockchain-honey-traceability.onrender.com
 
 ---
 
-## 📌 Project Overview
+## 🎯 Project Objective
 
-Honey products pass through multiple stages such as harvesting, collection, processing, packaging, distribution, and delivery.
+The objective of this project is to develop an intelligent traceability assistant that follows honey-product records throughout the supply chain and provides assurance about their traceability and compliance.
 
-Maintaining reliable information about these stages is important for understanding:
+The system:
 
-- Where the product originated
-- Which actors handled the product
-- Where each supply-chain event occurred
-- When each event occurred
-- Whether required traceability information is available
-- The current state of the product
-
-This project provides an API-based assurance system that combines multiple specialized agents into a single workflow.
-
----
-
-## 🎯 Objectives
-
-The system aims to:
-
-1. Track honey products throughout the supply chain.
-2. Maintain persistent product-state information.
-3. Retrieve and check traceability rules.
-4. Perform compliance checking.
-5. Analyze supply-chain events.
-6. Chain multiple agents into one workflow.
-7. Handle tool failures safely and provide recovery information.
-8. Record workflow telemetry.
-9. Apply role-based authorization and API-key protection.
-10. Deploy the backend as a live web service.
+- Tracks honey products and their supply-chain events
+- Maintains persistent product state
+- Retrieves traceability rules for compliance checking
+- Performs traceability analysis
+- Performs compliance checking
+- Performs supply-chain analysis
+- Coordinates the agents through a workflow
+- Handles tool failures safely
+- Records workflow telemetry
+- Applies role-based authorization and API-key protection
+- Provides a deployed REST API
 
 ---
 
@@ -46,7 +40,7 @@ The system aims to:
                     USER / CLIENT
                          |
                          v
-                  FASTAPI BACKEND
+                  TRACEABILITY API
                          |
                          v
                 WORKFLOW ORCHESTRATOR
@@ -55,25 +49,26 @@ The system aims to:
           |              |              |
           v              v              v
    TRACEABILITY      COMPLIANCE     SUPPLY-CHAIN
-      AGENT             AGENT          ANALYSIS
+      AGENT            AGENT          ANALYSIS
           |              |              |
           v              v              v
-   PRODUCT STORE     RAG RULES      PRODUCT DATA
+   Product Records   RAG Rules      Product/Supply
+                    Retriever          Data
           |              |
-          +--------------+--------------+
-                         |
-                         v
-                 PRODUCT STATE
-                         |
-                         v
-                FINAL ASSURANCE
-                     RESULT
+          +--------------+
+                 |
+                 v
+        Persistent Database
+                 |
+                 v
+           Product State
 
-        WORKFLOW
-           |
-           +----> TELEMETRY
-           |
-           +----> FAILURE / RECOVERY
+        Workflow Monitoring
+                 |
+        +--------+--------+
+        |                 |
+        v                 v
+    Telemetry      Failure & Recovery
 ```
 
 ---
@@ -92,25 +87,15 @@ It provides:
 - Current supply-chain stage
 - Supply-chain events
 - Event locations
-- Event actors
+- Responsible actors
 - Event timestamps
 - Event notes
 
-Endpoint:
-
-```text
-GET /traceability/{product_id}
-```
-
----
-
 ### 2. Compliance Agent
 
-The Compliance Agent checks whether a product satisfies the available traceability rules.
+The Compliance Agent checks a product against the available traceability rules.
 
-The agent retrieves relevant rules through the RAG rule-retrieval component and checks the product against those requirements.
-
-Example checks include:
+The current rules cover:
 
 - Product identification
 - Product origin
@@ -119,72 +104,51 @@ Example checks include:
 - Event actor
 - Event timestamp
 
-Endpoint:
-
-```text
-GET /compliance/{product_id}
-```
-
-Example successful response:
-
-```json
-{
-  "success": true,
-  "product_id": "HNY-003",
-  "compliant": true,
-  "violations": []
-}
-```
-
----
+The agent returns whether the product is compliant and lists any detected violations.
 
 ### 3. Supply-Chain Analysis Agent
 
-The Supply-Chain Analysis Agent analyzes the recorded supply-chain events and current product state.
+The Supply-Chain Analysis Agent analyzes the recorded supply-chain information.
 
-It provides information such as:
+It provides:
 
-- Current stage
-- Number of events
+- Current product stage
+- Total number of events
 - Recorded stages
 - Locations
 - Actors
-- Supply-chain analysis
-
-Endpoint:
-
-```text
-GET /supply-chain/{product_id}
-```
+- Basic supply-chain analysis
 
 ---
 
 ## 🔎 RAG-Based Traceability Rules
 
-The project includes a rule retrieval component for traceability requirements.
+The project includes a rule retrieval component for traceability compliance.
 
-Current rules include:
+The current implementation uses **keyword-based rule retrieval** to identify relevant traceability rules from the rule collection.
 
-| Rule ID | Rule |
-|---|---|
-| TR-001 | Product Identification |
-| TR-002 | Product Origin |
-| TR-003 | Supply Chain Events |
-| TR-004 | Event Location |
-| TR-005 | Event Actor |
-| TR-006 | Event Timestamp |
+Example rules include:
 
-The current implementation uses **keyword-based rule retrieval** to identify relevant traceability rules.
+```text
+TR-001 — Product Identification
+TR-002 — Product Origin
+TR-003 — Supply Chain Events
+TR-004 — Event Location
+TR-005 — Event Actor
+TR-006 — Event Timestamp
+```
 
-This provides the RAG-style retrieval layer required by the project without claiming a vector database or embedding-based semantic retrieval.
+The retrieved rules are then used by the Compliance Agent during compliance checking.
+
+> Note: This implementation uses a lightweight keyword-based retrieval approach rather than a vector database or embedding-based retrieval system.
 
 ---
 
-## 💾 Database and Product State
+## 🗄️ Persistent Product State
 
-The system uses **SQLite** for persistent product storage.
+Product records are stored using **SQLite**.
 
-Product records contain:
+The database maintains product information including:
 
 ```text
 Product ID
@@ -199,24 +163,21 @@ Supply-Chain Events
     └── Notes
 ```
 
-Supported product stages include:
+The persistent database allows product state to remain available across application restarts.
+
+Database file:
 
 ```text
-harvested
-collected
-processed
-packaged
-distributed
-delivered
+backend/database/honey_traceability.db
 ```
-
-The product state is persisted in the database so that records remain available across application restarts.
 
 ---
 
-## 🔗 Workflow Orchestration
+## 🔄 Workflow Orchestration
 
-The Workflow Orchestrator coordinates the three agents in sequence:
+The Workflow Orchestrator connects the three agents into a single assurance workflow.
+
+### Workflow
 
 ```text
 1. Traceability
@@ -228,45 +189,17 @@ The Workflow Orchestrator coordinates the three agents in sequence:
 4. Final Assurance Result
 ```
 
-Endpoint:
+Each stage is executed sequentially.
 
-```text
-GET /workflow/{product_id}
-```
-
-Example successful workflow:
-
-```json
-{
-  "success": true,
-  "product_id": "HNY-003",
-  "workflow": {
-    "traceability": {},
-    "compliance": {
-      "success": true,
-      "compliant": true,
-      "violations": []
-    },
-    "supply_chain_analysis": {}
-  }
-}
-```
+If a stage fails, the workflow returns structured failure and recovery information instead of silently continuing.
 
 ---
 
-## ⚠️ Tool Failure and Recovery
+## 🛠️ Failure Handling & Recovery
 
-The workflow includes basic failure handling.
+The workflow includes basic failure handling for agent/tool failures.
 
-If an agent or tool fails, the workflow:
-
-1. Identifies the failed stage.
-2. Records the failure through telemetry.
-3. Stops the workflow safely.
-4. Returns structured recovery information.
-5. Provides the next recommended action.
-
-Example:
+For example, if a product does not exist:
 
 ```json
 {
@@ -281,32 +214,36 @@ Example:
 }
 ```
 
+This demonstrates controlled workflow failure and recovery information.
+
 ---
 
 ## 📊 Telemetry
 
-The system records workflow events including:
+The project includes basic workflow telemetry.
 
-- Workflow started
-- Workflow completed
-- Workflow failed
+Telemetry records events such as:
+
+```text
+workflow_started
+workflow_failed
+workflow_completed
+```
 
 Each telemetry event records:
 
-```text
-Timestamp
-Event Type
-Product ID
-Details
-```
+- Timestamp
+- Event type
+- Product ID
+- Event details
 
-This provides basic observability for the agent workflow.
+This provides visibility into workflow execution.
 
 ---
 
-## 🔐 Authorization and Security
+## 🔐 Authorization & Security
 
-The project includes basic authorization controls.
+The system includes basic authorization controls.
 
 ### User Roles
 
@@ -316,41 +253,117 @@ OPERATOR
 VIEWER
 ```
 
-Permissions are assigned according to the user's role.
+Permissions are defined according to the user's role.
 
-The workflow endpoint also uses an API key for access protection.
+The workflow API also uses API-key validation.
 
 Example:
 
 ```text
-x-api-key: <your-api-key>
+Valid API Key
+      ↓
+Role Authorization
+      ↓
+Workflow Execution
 ```
 
-API keys are stored through environment variables rather than hard-coded in the source code.
+Invalid API keys are rejected with an HTTP `401 Unauthorized` response.
+
+Unauthorized operations return an HTTP `403 Forbidden` response.
+
+Environment-specific configuration and API keys are managed through environment variables.
 
 ---
 
-## ⚙️ Configuration
+## 🌐 REST API
 
-Create a `.env` file in the project root:
+The application is implemented using **FastAPI**.
 
-```env
-APP_NAME=Blockchain Honey Traceability Assurance Agent
-APP_ENV=production
-API_KEY=your-secure-api-key
-```
-
-The `.env` file should **never be committed to GitHub**.
-
-The project `.gitignore` excludes:
+### Product APIs
 
 ```text
-.env
-venv/
-__pycache__/
-*.pyc
-*.db
-.pytest_cache/
+POST /products/
+GET  /products/
+GET  /products/{product_id}
+```
+
+### Traceability API
+
+```text
+GET /traceability/{product_id}
+```
+
+### Compliance API
+
+```text
+GET /compliance/{product_id}
+```
+
+### Supply-Chain Analysis API
+
+```text
+GET /supply-chain/{product_id}
+```
+
+### Workflow API
+
+```text
+GET /workflow/{product_id}
+```
+
+### Health Check
+
+```text
+GET /health
+```
+
+---
+
+## 📋 Example Product
+
+The project includes an example honey product:
+
+```json
+{
+  "product_id": "HNY-003",
+  "product_name": "Himalayan Organic Honey",
+  "origin": "Nepal",
+  "current_stage": "harvested",
+  "events": [
+    {
+      "stage": "harvested",
+      "location": "Kaski, Nepal",
+      "actor": "ABC Beekeepers",
+      "timestamp": "2026-11-22T10:00:00",
+      "notes": "Honey harvested from registered apiary"
+    }
+  ]
+}
+```
+
+---
+
+## 🧪 Testing
+
+The project includes automated tests for the core agents and workflow.
+
+Current test coverage includes:
+
+- Missing product handling in Traceability Agent
+- Missing product handling in Compliance Agent
+- Missing product handling in Supply-Chain Analysis Agent
+- Workflow failure and recovery handling
+
+Run the tests with:
+
+```bash
+python -m pytest backend/tests/test_agents.py
+```
+
+Current result:
+
+```text
+4 passed
 ```
 
 ---
@@ -360,22 +373,13 @@ __pycache__/
 ```text
 blockchain-honey-traceability/
 │
-├── .env
-├── .gitignore
-│
 ├── backend/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── config.py
-│   │
 │   ├── agents/
-│   │   ├── __init__.py
 │   │   ├── traceability_agent.py
 │   │   ├── compliance_agent.py
 │   │   └── supply_chain_agent.py
 │   │
 │   ├── api/
-│   │   ├── __init__.py
 │   │   ├── product_routes.py
 │   │   ├── traceability.py
 │   │   ├── compliance.py
@@ -383,38 +387,40 @@ blockchain-honey-traceability/
 │   │   └── workflow.py
 │   │
 │   ├── database/
-│   │   ├── __init__.py
 │   │   ├── models.py
 │   │   ├── product_store.py
 │   │   └── honey_traceability.db
 │   │
 │   ├── rag/
-│   │   ├── __init__.py
 │   │   ├── traceability_rules.py
 │   │   └── rule_retriever.py
 │   │
 │   ├── workflow/
-│   │   ├── __init__.py
 │   │   └── orchestrator.py
 │   │
 │   ├── security/
-│   │   ├── __init__.py
 │   │   └── authorization.py
 │   │
 │   ├── telemetry/
-│   │   ├── __init__.py
 │   │   └── telemetry.py
 │   │
-│   └── tests/
-│       ├── __init__.py
-│       └── test_agents.py
+│   ├── tests/
+│   │   └── test_agents.py
+│   │
+│   ├── config.py
+│   └── main.py
 │
+├── .gitignore
+├── .env
+├── requirements.txt
 └── README.md
 ```
 
+> The `.env` file should not be committed to GitHub. Secrets should be configured through environment variables.
+
 ---
 
-## 🛠️ Technologies Used
+## ⚙️ Technologies Used
 
 - **Python**
 - **FastAPI**
@@ -423,16 +429,20 @@ blockchain-honey-traceability/
 - **SQLite**
 - **Python-dotenv**
 - **Pytest**
-- **OpenTelemetry API**
+- **REST API**
+- **Rule-based RAG retrieval**
+- **Role-based authorization**
+- **API-key protection**
+- **Render**
 
 ---
 
-## 🚀 Local Installation
+## ▶️ Run Locally
 
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/blockchain-honey-traceability.git
+git clone https://github.com/DeepakChaudhary369/blockchain-honey-traceability.git
 cd blockchain-honey-traceability
 ```
 
@@ -442,7 +452,7 @@ cd blockchain-honey-traceability
 python -m venv venv
 ```
 
-### 3. Activate the virtual environment
+### 3. Activate the environment
 
 Windows PowerShell:
 
@@ -450,45 +460,29 @@ Windows PowerShell:
 .\venv\Scripts\Activate.ps1
 ```
 
-If PowerShell activation is restricted, use Command Prompt:
-
-```cmd
-venv\Scripts\activate
-```
-
 ### 4. Install dependencies
 
 ```bash
-python -m pip install fastapi uvicorn pydantic python-dotenv pytest opentelemetry-api
+python -m pip install -r requirements.txt
 ```
 
 ### 5. Configure environment variables
 
-Create `.env`:
+Create a `.env` file in the project root:
 
 ```env
 APP_NAME=Blockchain Honey Traceability Assurance Agent
 APP_ENV=development
-API_KEY=your-development-api-key
+API_KEY=your-secure-api-key
 ```
 
----
-
-## ▶️ Run the Application
-
-From the project root:
+### 6. Start the API
 
 ```bash
 python -m uvicorn backend.main:app --reload
 ```
 
-The application will be available at:
-
-```text
-http://127.0.0.1:8000
-```
-
-Swagger API documentation:
+### 7. Open Swagger
 
 ```text
 http://127.0.0.1:8000/docs
@@ -496,119 +490,66 @@ http://127.0.0.1:8000/docs
 
 ---
 
-## 🧪 Testing
+## ☁️ Deployment
 
-Run the automated tests:
+The backend is deployed using **Render**.
 
-```bash
-python -m pytest backend/tests/test_agents.py
-```
-
-Current test coverage includes:
-
-- Traceability failure handling
-- Compliance failure handling
-- Supply-chain analysis failure handling
-- Workflow failure and recovery
-
-Expected result:
-
-```text
-4 passed
-```
-
----
-
-## 🌐 Deployment
-
-The backend has been deployed as a web service using **Render**.
-
-Live API:
+Production API:
 
 ```text
 https://blockchain-honey-traceability.onrender.com
 ```
 
-Interactive API documentation:
+Swagger API documentation:
 
 ```text
 https://blockchain-honey-traceability.onrender.com/docs
 ```
 
-The production deployment was tested successfully with:
-
-```text
-HTTP 200 OK
-```
-
-for the complete workflow.
-
----
-
-## ✅ Live Workflow Validation
-
-A test product was created:
-
-```text
-Product ID: HNY-003
-Product Name: Himalayan Organic Honey
-Origin: Nepal
-Current Stage: harvested
-Location: Kaski, Nepal
-Actor: ABC Beekeepers
-```
-
-The deployed workflow successfully returned:
-
-```text
-success: true
-```
-
-with:
-
-```text
-Traceability → Successful
-Compliance → Compliant
-Supply-Chain Analysis → Successful
-Workflow → Successful
-```
+The deployed service uses environment variables for production configuration and API-key protection.
 
 ---
 
 ## 🔒 Security Notes
 
-Sensitive configuration values such as API keys are stored using environment variables.
+Sensitive configuration should not be stored directly in source code.
 
-Do not commit:
+The project uses:
 
-```text
-.env
-```
+- `.env` for local secrets
+- Render environment variables for deployment secrets
+- `.gitignore` to prevent `.env` from being committed
+- API-key validation
+- Role-based authorization
 
-to GitHub.
-
-For production deployment, configure secrets through the deployment platform's environment-variable settings.
+Never publish the actual API key in the repository, README, screenshots, or public documentation.
 
 ---
 
-## 📌 Project Scope
+## 🎓 Project Requirements Mapping
 
-This project focuses on the requirements of the **Blockchain Honey Traceability Assurance Agent** assignment:
+| Requirement | Implementation |
+|---|---|
+| Traceability Agent | ✅ Implemented |
+| Compliance Agent | ✅ Implemented |
+| Supply-Chain Analysis Agent | ✅ Implemented |
+| Blockchain/Database API integration | ✅ Persistent SQLite database |
+| Product state maintenance | ✅ Implemented |
+| RAG for traceability rules | ✅ Rule retrieval implemented |
+| Workflow chaining | ✅ Implemented |
+| Tool failure & recovery | ✅ Implemented |
+| Testing | ✅ Pytest |
+| Telemetry | ✅ Implemented |
+| Authorization | ✅ Role-based authorization + API key |
+| Secure deployment | ✅ Environment variables + Render deployment |
 
-- Traceability Agent
-- Compliance Agent
-- Supply-Chain Analysis Agent
-- Database integration
-- Product state maintenance
-- RAG-based traceability rules
-- Workflow chaining
-- Tool failure and recovery
-- Testing
-- Telemetry
-- Authorization
-- Secure deployment
+---
 
-The current implementation uses **SQLite for persistent database-backed product records**. It does not claim to implement a live blockchain network.
+## 📌 Current Implementation Scope
+
+This project focuses on the requirements defined for the **Blockchain Honey Traceability Assurance Agent**.
+
+The current implementation uses a persistent database for product records and a lightweight rule-retrieval approach for traceability compliance. It does **not** claim to implement a live public blockchain network or production-grade vector-database RAG.
 
 ---
 
@@ -616,11 +557,13 @@ The current implementation uses **SQLite for persistent database-backed product 
 
 **Deepak Chaudhary**
 
-B.Tech Computer Science & Engineering  
-Data Science Specialization
+B.Tech — Computer Science & Engineering (Data Science)
+
+GitHub:  
+https://github.com/DeepakChaudhary369
 
 ---
 
 ## 📄 License
 
-This project is developed for academic/project purposes.
+This project is developed as an academic/college project for demonstrating intelligent agent workflows, honey-product traceability, compliance checking, supply-chain analysis, and assurance.
